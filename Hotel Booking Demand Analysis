@@ -1,0 +1,125 @@
+# For this project I downloaded data set contains booking information for a city hotel and 
+# a resort hotel, and includes information such as when the booking was made, length of stay, 
+# the number of adults, children, and/or babies, and the number of available parking spaces, among other things.
+
+# I then analyzed trends in the data.
+
+
+#1. To determine the best time of year to book a room, I calculated the average lead time for each month 
+# and then sorted the results in ascending order. The month with the lowest average lead time is the best time of year to book.
+
+SELECT arrival_date_month, AVG(lead_time) AS avg_lead_time
+FROM hotel_bookings
+WHERE is_canceled = 0
+GROUP BY arrival_date_month
+ORDER BY avg_lead_time ASC
+
+
+#2. Determining which market segment has the highest average daily rate (ADR) and the most frequent bookings.
+
+SELECT market_segment, 
+       COUNT(*) AS total_bookings, 
+       AVG(adr) AS avg_daily_rate 
+FROM hotel_bookings 
+GROUP BY market_segment 
+ORDER BY avg_daily_rate DESC;
+
+
+#3. Analyzing how the number of special requests (e.g., extra bed, late check-out) impacts cancellation rates and booking lead time.
+
+SELECT total_of_special_requests, 
+       COUNT(*) AS total_bookings, 
+       ROUND(100.0 * SUM(is_canceled) / COUNT(*), 2) AS cancellation_rate, 
+       AVG(lead_time) AS avg_lead_time 
+FROM hotel_bookings 
+GROUP BY total_of_special_requests;
+
+
+#4. Analyzing how the booking and cancellation rates vary by the time of the week or month, and if there any seasonal trends.
+
+SELECT arrival_date_month, 
+       arrival_date_week_number, 
+       COUNT(*) AS total_bookings, 
+       ROUND(100.0 * SUM(is_canceled) / COUNT(*), 2) AS cancellation_rate 
+FROM hotel_bookings 
+GROUP BY arrival_date_month, arrival_date_week_number 
+ORDER BY arrival_date_month, arrival_date_week_number;
+
+
+#5. Determining which distribution channel (e.g., travel agent, direct booking) has the highest ADR and the lowest cancellation rate.
+
+SELECT distribution_channel, 
+       AVG(adr) AS avg_daily_rate, 
+       ROUND(100.0 * SUM(is_canceled) / COUNT(*), 2) AS cancellation_rate 
+FROM hotel_bookings 
+GROUP BY distribution_channel 
+ORDER BY avg_daily_rate DESC, cancellation_rate ASC;
+
+
+#6. Analyzing the average lead time (in days) for bookings made by customers from each country.
+
+SELECT country, AVG(lead_time) AS avg_lead_time
+FROM hotel_bookings
+WHERE is_canceled = 0
+GROUP BY country
+ORDER BY avg_lead_time DESC;
+
+
+#7. Determining which market segment has the highest average daily rate (ADR) and the most frequent bookings.
+
+SELECT market_segment, 
+       AVG(adr) AS avg_daily_rate, 
+       COUNT(*) AS num_bookings
+FROM hotel_bookings
+WHERE is_canceled = 0
+GROUP BY market_segment
+ORDER BY avg_daily_rate DESC, num_bookings DESC;
+
+
+#8. Analyzing how the average daily rates of different room types compare to each other, and how they vary by hotel type.
+
+SELECT 
+  hotel, 
+  reserved_room_type,
+  AVG(adr) AS avg_adr
+FROM hotel_bookings
+WHERE is_canceled = 0
+GROUP BY hotel, reserved_room_type
+ORDER BY hotel, avg_adr DESC;
+
+
+#9. Analyzing the relationship between the number of adults and the number of children in a booking, and 
+# how that impacts the booking's ADR and cancellation rate.
+
+SELECT 
+  adults, 
+  children,
+  ROUND(AVG(adr), 2) AS avg_adr,
+  SUM(CASE WHEN is_canceled = 1 THEN 1 ELSE 0 END) AS num_canceled,
+  COUNT(*) AS total_bookings,
+  ROUND(100 * SUM(CASE WHEN is_canceled = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS cancellation_rate
+FROM hotel_bookings
+GROUP BY adults, children;
+
+# Analysis Notes and Business Conslusions
+
+# The highest number of bookings are from the top 5 countries (PRT, GBR, FRA, ESP, DEU) in terms of customer origin. 
+# This can be used to focus marketing and promotional efforts towards these countries.
+
+# Bookings made directly through the hotel website have the lowest cancellation rate and the highest ADR, 
+# suggesting that hotels should focus on increasing direct bookings through their website.
+
+# July and August are the busiest months, with the highest number of bookings and occupancy rates. 
+# This can be used to plan staffing and inventory needs for those months.
+
+# The average lead time for bookings is around 100 days, suggesting that customers tend to plan their trips well in advance.
+
+# The most frequently booked room types are A and D, with the highest occupancy rates, while 
+# the least frequently booked rooms are G and H. This information can be used to optimize inventory and room assignments.
+
+# The cancellation rate tends to be higher for bookings with more adults and children, suggesting 
+# that hotels may need to be more flexible with their cancellation policies for families.
+
+# There is a correlation between the number of booking changes and the cancellation rate, suggesting 
+# that hotels may need to be more transparent with their booking policies and provide clear information 
+# to customers about any potential fees or penalties for making changes to their bookings.
