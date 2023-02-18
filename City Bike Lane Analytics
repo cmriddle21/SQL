@@ -91,6 +91,7 @@ rating,
 FROM safety_average_cte
 WHERE rating >=4;
 
+
 #2. Using the WINDOW function a list all the bike lanes, both safety ratings for each lane, 
 the average safety rating for each lane, and a label with the recommendation as 
 "Remove", "Leave As-Is", or "Improvements Needed".
@@ -104,4 +105,45 @@ CASE WHEN AVG(safetyrating) OVER (PARTITION BY safetyrating) >=4 THEN "Leave As-
 FROM CityBikeLanes
 
 
+#3. Determining the average width of bike lanes:
+
+SELECT ROUND(AVG(width_feet), 2) as avg_width FROM CityBikeLanes;
+
+
+#4. Determining which street has the highest number of bike lanes
+
+SELECT street, COUNT(*) as num_of_bikelanes 
+FROM CityBikeLanes 
+GROUP BY street 
+ORDER BY num_of_bikelanes DESC 
+LIMIT 1;
+
+
+#5. Determining the average safety rating of bike lanes that are protected versus unprotected
+
+SELECT protected, AVG(safetyrating) as avg_safetyrating 
+FROM CityBikeLanes 
+GROUP BY protected;
+
+
+#6. Analyzing whether bike lane safety ratings have improved or declined over time.
+
+SELECT year_installed, AVG(safetyrating) as avg_rating 
+FROM CityBikeLanes 
+GROUP BY year_installed 
+ORDER BY year_installed;
+
+
+#7.  Analyzing the relationship between bike lane safety ratings and other variables, 
+such as width, year installed, and location.
+
+SELECT width_feet, safetyrating 
+FROM CityBikeLanes;
+
+
+#8. Analyzing trends in bike lane installations over time.
+
+SELECT year_installed, COUNT(*) as num_installations
+FROM CityBikeLanes
+GROUP BY year_installed;
 
